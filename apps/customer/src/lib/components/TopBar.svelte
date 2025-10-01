@@ -58,43 +58,51 @@
 
   $: texts = currentLanguage === 'ar' ? {
     appName: 'أوربان إكسبرس',
-    language: 'En'
+    currentLang: 'العربية',
+    otherLang: 'English'
   } : {
     appName: 'Urban Express',
-    language: 'عر'
+    currentLang: 'English',
+    otherLang: 'العربية'
   };
 </script>
 
 <header class="top-bar">
   <div class="top-bar-content">
-    <!-- App Logo -->
-    <div class="app-brand">
-      <div class="logo">
-        <img src="/logo.png" alt="Urban Express Logo" />
-      </div>
-    </div>
-
     <!-- Right side actions -->
     <div class="top-actions">
-      <!-- Language Toggle -->
-      <button class="language-btn" on:click={toggleLanguage}>
-        {texts.language}
-      </button>
+      <!-- Language Switch -->
+      <div class="language-switch">
+        <span class="lang-label" class:active={currentLanguage === 'ar'}>العربية</span>
+        <label class="switch">
+          <input 
+            type="checkbox" 
+            checked={currentLanguage === 'en'} 
+            on:change={toggleLanguage}
+          />
+          <span class="slider"></span>
+        </label>
+        <span class="lang-label" class:active={currentLanguage === 'en'}>English</span>
+      </div>
 
       <!-- Cart -->
-      <button class="cart-btn" on:click={goToCart}>
-        <span class="cart-icon">🛒</span>
-        {#if cartItemCount > 0}
-          <span class="cart-badge">{cartItemCount}</span>
-        {/if}
+      <button class="action-btn" on:click={goToCart}>
+        <div class="icon-container">
+          <span class="action-icon">🛒</span>
+          {#if cartItemCount > 0}
+            <span class="action-badge">{cartItemCount}</span>
+          {/if}
+        </div>
       </button>
 
       <!-- Notifications -->
-      <button class="notification-btn" on:click={goToNotifications}>
-        <span class="notification-icon">🔔</span>
-        {#if notificationCount > 0}
-          <span class="notification-badge">{notificationCount}</span>
-        {/if}
+      <button class="action-btn" on:click={goToNotifications}>
+        <div class="icon-container">
+          <span class="action-icon">🔔</span>
+          {#if notificationCount > 0}
+            <span class="action-badge">{notificationCount}</span>
+          {/if}
+        </div>
       </button>
     </div>
   </div>
@@ -115,84 +123,124 @@
 
   .top-bar-content {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
     height: 100%;
-    padding: 0 1rem;
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 0;
   }
 
-  .app-brand {
+  .top-actions {
+    display: flex;
+    width: 100%;
+    align-items: center;
+  }
+
+  .language-switch {
+    flex: 1;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
   }
 
-  .logo {
+  .lang-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-ink-light);
+    transition: color 0.2s ease;
+  }
+
+  .lang-label.active {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-border);
+    transition: 0.3s;
+    border-radius: 20px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  input:checked + .slider {
+    background-color: var(--color-primary);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+
+  .action-btn {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--color-ink-light);
+  }
+
+  .action-btn:hover {
+    color: var(--color-primary);
+  }
+
+  .icon-container {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .logo img {
-    height: 48px;
-    width: auto;
-    object-fit: contain;
+  .action-icon {
+    font-size: 1.2rem;
+    display: block;
   }
 
-  .app-name {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    margin: 0;
+  .action-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
   }
 
-  .top-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .language-btn {
-    padding: 0.5rem 1rem;
-    background: var(--color-surface);
-    border: 2px solid var(--color-border);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--color-ink);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .language-btn:hover {
-    border-color: var(--color-primary);
-    background: var(--color-primary-light);
-  }
-
-  .cart-btn {
-    position: relative;
-    padding: 0.5rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.2s ease;
-  }
-
-  .cart-btn:hover {
-    background: var(--color-surface);
-  }
-
-  .cart-icon {
-    font-size: 1.25rem;
-  }
-
-  .cart-badge {
+  .action-badge {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: -0.25rem;
+    right: -0.25rem;
     background: var(--color-primary);
     color: white;
     font-size: 0.7rem;
@@ -202,39 +250,7 @@
     min-width: 16px;
     text-align: center;
     line-height: 1;
-  }
-
-  .notification-btn {
-    position: relative;
-    padding: 0.5rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.2s ease;
-  }
-
-  .notification-btn:hover {
-    background: var(--color-surface);
-  }
-
-  .notification-icon {
-    font-size: 1.25rem;
-  }
-
-  .notification-badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: var(--color-accent);
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 0.15rem 0.4rem;
-    border-radius: 10px;
-    min-width: 16px;
-    text-align: center;
-    line-height: 1;
+    z-index: 1;
   }
 
   /* Add top padding to body content to account for fixed header */
@@ -244,25 +260,39 @@
 
   /* Responsive adjustments */
   @media (max-width: 480px) {
-    .top-bar-content {
-      padding: 0 0.75rem;
+    .action-btn {
+      padding: var(--space-1);
     }
 
-    .app-name {
+    .action-icon {
       font-size: 1.1rem;
     }
 
-    .logo {
-      font-size: 1.6rem;
+    .action-label {
+      font-size: 0.7rem;
     }
 
-    .top-actions {
-      gap: 0.75rem;
+    .language-switch {
+      gap: 0.3rem;
+      padding: 0.3rem;
     }
 
-    .language-btn {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.85rem;
+    .lang-label {
+      font-size: 0.7rem;
+    }
+
+    .switch {
+      width: 35px;
+      height: 18px;
+    }
+
+    .slider:before {
+      height: 14px;
+      width: 14px;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(17px);
     }
   }
 </style>

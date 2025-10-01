@@ -30,13 +30,11 @@
   $: texts = currentLanguage === 'ar' ? {
     home: 'الرئيسية',
     products: 'المنتجات', 
-    orders: 'الطلبات',
     profile: 'الحساب',
     chat: 'الدردشة'
   } : {
     home: 'Home',
     products: 'Products',
-    orders: 'Orders', 
     profile: 'Profile',
     chat: 'Chat'
   };
@@ -44,7 +42,6 @@
   const navigationItems = [
     { path: '/', icon: '🏠', labelKey: 'home' },
     { path: '/products', icon: '📦', labelKey: 'products' },
-    { path: '/orders', icon: '📋', labelKey: 'orders' },
     { path: '/profile', icon: '👤', labelKey: 'profile' },
     { path: '/chat', icon: '💬', labelKey: 'chat' }
   ];

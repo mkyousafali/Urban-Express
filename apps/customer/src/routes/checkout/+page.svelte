@@ -39,7 +39,6 @@
     orderConfirmed: 'تم تأكيد الطلب',
     orderNumber: 'رقم الطلب',
     thankYou: 'شكراً لك! سيتم إشعارك بمجرد تأكيد طلبك.',
-    continueShopping: 'متابعة التسوق',
     closeOrder: 'إغلاق',
     sar: 'ريال',
     free: 'مجاني',
@@ -67,7 +66,6 @@
     orderConfirmed: 'Order Placed',
     orderNumber: 'Order Number',
     thankYou: 'Thank you! We will notify you once we confirm your order.',
-    continueShopping: 'Continue Shopping',
     closeOrder: 'Close',
     sar: 'SAR',
     free: 'Free',
@@ -440,9 +438,6 @@
       <div class="popup-actions">
         <Button variant="primary" on:click={() => goto('/orders')}>
           {currentLanguage === 'ar' ? 'عرض الطلبات' : 'View Orders'}
-        </Button>
-        <Button variant="secondary" on:click={closeOrderConfirmation}>
-          {texts.continueShopping}
         </Button>
       </div>
     </div>

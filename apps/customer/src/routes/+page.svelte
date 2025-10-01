@@ -203,10 +203,15 @@
 </svelte:head>
 
 <div class="home-container" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
-  <!-- Header Section -->
+  <!-- Header Section with LED Welcome Message -->
   <div class="header-section">
-    <h1>{texts.greeting}</h1>
-    <p>{texts.subtitle}</p>
+    <div class="led-welcome-container">
+      <div class="led-border">
+        <div class="welcome-content">
+          <h1 class="welcome-text">{texts.greeting}</h1>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Advertisement Video Section (LED Screen Style) -->
@@ -296,11 +301,15 @@
     </div>
   {/if}
 
-  <!-- All Products Button -->
-  <button class="all-products-btn" on:click={handleAllProducts}>
-    <div class="btn-icon">🛒</div>
-    <span>{texts.allCategories}</span>
-  </button>
+  <!-- Category Selection Section -->
+  <div class="category-selection-section">
+    <p class="category-subtitle">{texts.subtitle}</p>
+    <!-- All Products Button -->
+    <button class="all-products-btn" on:click={handleAllProducts}>
+      <div class="btn-icon">🛒</div>
+      <span>{texts.allCategories}</span>
+    </button>
+  </div>
 
   <!-- Categories Grid -->
   <div class="categories-grid">
@@ -329,18 +338,96 @@
     padding: 1rem 0;
   }
 
-  .header-section h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--color-ink);
-    margin-bottom: 0.5rem;
+  .led-welcome-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
   }
 
-  .header-section p {
-    font-size: 1rem;
-    color: var(--color-ink-light);
-    line-height: 1.5;
+  .led-border {
+    position: relative;
+    width: 300px;
+    height: 80px;
+    border-radius: 20px;
+    padding: 6px;
+    background: linear-gradient(45deg, 
+      var(--color-primary) 0%, 
+      var(--color-primary) 25%, 
+      var(--color-accent) 50%, 
+      var(--color-accent) 75%, 
+      var(--color-primary) 100%
+    );
+    background-size: 400% 400%;
+    animation: ledGlow 3s ease-in-out infinite;
+    box-shadow: 
+      0 0 30px rgba(76, 175, 80, 0.4),
+      0 0 60px rgba(255, 152, 0, 0.2),
+      inset 0 0 20px rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
+
+  .led-border::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    border-radius: 17px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    z-index: 1;
+  }
+
+  .welcome-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .welcome-text {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+    text-align: center;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  @keyframes ledGlow {
+    0% {
+      background-position: 0% 50%;
+      box-shadow: 
+        0 0 30px rgba(76, 175, 80, 0.7),
+        0 0 60px rgba(76, 175, 80, 0.4),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    50% {
+      background-position: 100% 50%;
+      box-shadow: 
+        0 0 30px rgba(255, 152, 0, 0.7),
+        0 0 60px rgba(255, 152, 0, 0.4),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    100% {
+      background-position: 0% 50%;
+      box-shadow: 
+        0 0 30px rgba(76, 175, 80, 0.7),
+        0 0 60px rgba(76, 175, 80, 0.4),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+  }
+
+
 
   /* Advertisement LED Screen Styles */
   .advertisement-section {
@@ -657,6 +744,19 @@
     50% { opacity: 0.4; }
   }
 
+  .category-selection-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .category-subtitle {
+    font-size: 1rem;
+    color: var(--color-ink-light);
+    line-height: 1.5;
+    text-align: center;
+    margin-bottom: 1rem;
+    margin-top: 0;
+  }
+
   .all-products-btn {
     width: 100%;
     display: flex;
@@ -734,8 +834,23 @@
       padding: 0.75rem;
     }
 
-    .header-section h1 {
-      font-size: 1.75rem;
+    .led-border {
+      width: 280px;
+      height: 70px;
+      border-radius: 16px;
+      padding: 5px;
+    }
+
+    .led-border::before {
+      top: 2px;
+      left: 2px;
+      right: 2px;
+      bottom: 2px;
+      border-radius: 14px;
+    }
+
+    .welcome-text {
+      font-size: 1.2rem;
     }
 
     .advertisement-section {
@@ -808,6 +923,16 @@
     .home-container {
       max-width: 800px;
       padding: 2rem;
+    }
+
+    .led-border {
+      width: 400px;
+      height: 90px;
+      border-radius: 24px;
+    }
+
+    .welcome-text {
+      font-size: 1.8rem;
     }
 
     .led-screen-container {

@@ -4,8 +4,13 @@
   import { goto } from '$app/navigation';
   import Button from '$lib/components/Button.svelte';
   import Card from '$lib/components/Card.svelte';
+  import { deliveryFeeTiers, calculateDeliveryFee } from '$lib/stores/deliveryFee.js';
   
   let currentLanguage = 'ar';
+  let currentTiers = [];
+
+  // Load delivery fee tiers
+  $: deliveryFeeTiers.subscribe(tiers => currentTiers = tiers);
 
   // Load language from localStorage
   onMount(() => {
@@ -36,13 +41,27 @@
   const orderData = {
     id: `#${orderId}`,
     status: 'in_transit',
-    items: 'طرد شخصي',
-    itemsEn: 'Personal package',
-    pickupAddress: 'شارع الملك فهد، الرياض',
-    pickupAddressEn: 'King Fahd Street, Riyadh',
-    deliveryAddress: 'حي الملز، الرياض',
-    deliveryAddressEn: 'Al-Malaz District, Riyadh',
-    amount: 35.00,
+    items: [
+      {
+        id: 1,
+        nameAr: 'طماطم طازجة محلية',
+        nameEn: 'Fresh Local Tomatoes',
+        quantity: 2,
+        price: 5.50,
+        icon: '🍅'
+      },
+      {
+        id: 2,
+        nameAr: 'موز طازج',
+        nameEn: 'Fresh Bananas',
+        quantity: 1,
+        price: 6.75,
+        icon: '🍌'
+      }
+    ],
+    subtotal: 17.75,
+    deliveryFee: 0, // Will be calculated
+    total: 17.75, // Will be calculated
     driver: {
       name: 'محمد العلي',
       nameEn: 'Mohammed Al-Ali',
@@ -96,34 +115,34 @@
 
   $: texts = currentLanguage === 'ar' ? {
     title: 'تتبع الطلب',
-    orderDetails: 'تفاصيل الطلب',
+    orderSummary: 'ملخص الطلب',
+    viewOrder: 'عرض الطلب',
     driverInfo: 'معلومات السائق',
-    trackingInfo: 'معلومات التتبع',
-    from: 'من',
-    to: 'إلى',
-    estimatedArrival: 'الوصول المتوقع',
-    currentLocation: 'الموقع الحالي',
-    amount: 'المبلغ',
+    subtotal: 'المجموع الفرعي',
+    deliveryFee: 'رسوم التوصيل',
+    total: 'المجموع الكلي',
+    sar: 'ر.س',
+    free: 'مجاني',
     rating: 'التقييم',
     vehicleType: 'نوع المركبة',
     callDriver: 'اتصل بالسائق',
-    chatDriver: 'راسل السائق',
+    chatSupport: 'دردشة مع الدعم',
     backToOrders: 'العودة للطلبات',
     orderTimeline: 'مراحل الطلب'
   } : {
     title: 'Track Order',
-    orderDetails: 'Order Details',
+    orderSummary: 'Order Summary',
+    viewOrder: 'View Order',
     driverInfo: 'Driver Information',
-    trackingInfo: 'Tracking Information',
-    from: 'From',
-    to: 'To',
-    estimatedArrival: 'Estimated Arrival',
-    currentLocation: 'Current Location',
-    amount: 'Amount',
+    subtotal: 'Subtotal',
+    deliveryFee: 'Delivery Fee',
+    total: 'Total',
+    sar: 'SAR',
+    free: 'Free',
     rating: 'Rating',
     vehicleType: 'Vehicle Type',
     callDriver: 'Call Driver',
-    chatDriver: 'Chat with Driver',
+    chatSupport: 'Chat with Support',
     backToOrders: 'Back to Orders',
     orderTimeline: 'Order Timeline'
   };
@@ -141,9 +160,17 @@
     window.open(`tel:${orderData.driver.phone}`);
   }
 
-  function chatWithDriver() {
-    goto(`/chat/driver/${orderId}`);
+  function chatWithSupport() {
+    goto('/chat');
   }
+
+  function viewOrder() {
+    goto(`/orders/${orderId}/view`);
+  }
+
+  // Calculate delivery fee
+  $: calculatedDeliveryFee = calculateDeliveryFee(orderData.subtotal, currentTiers);
+  $: finalTotal = orderData.subtotal + calculatedDeliveryFee;
 </script>
 
 <div class="tracking-container">
@@ -160,30 +187,23 @@
       <div class="status-icon in-transit">🚚</div>
       <div class="status-content">
         <h2>{currentLanguage === 'ar' ? 'في الطريق إليك' : 'On the way to you'}</h2>
-        <p class="eta">{texts.estimatedArrival}: {orderData.estimatedArrival}</p>
-        <p class="current-location">
-          {texts.currentLocation}: {currentLanguage === 'ar' ? orderData.currentLocation : orderData.currentLocationEn}
-        </p>
       </div>
     </div>
   </Card>
 
-  <!-- Order Details -->
+  <!-- Order Summary -->
   <Card>
     <div class="section">
-      <h3>{texts.orderDetails}</h3>
-      <div class="order-info">
-        <div class="info-row">
-          <span class="label">{texts.from}:</span>
-          <span>{currentLanguage === 'ar' ? orderData.pickupAddress : orderData.pickupAddressEn}</span>
-        </div>
-        <div class="info-row">
-          <span class="label">{texts.to}:</span>
-          <span>{currentLanguage === 'ar' ? orderData.deliveryAddress : orderData.deliveryAddressEn}</span>
-        </div>
-        <div class="info-row">
-          <span class="label">{texts.amount}:</span>
-          <span class="amount">{orderData.amount.toFixed(2)} ر.س</span>
+      <div class="section-header">
+        <h3>{texts.orderSummary}</h3>
+        <Button size="sm" variant="secondary" on:click={viewOrder}>
+          {texts.viewOrder}
+        </Button>
+      </div>
+      <div class="summary-rows">
+        <div class="summary-row total-row">
+          <span>{texts.total}</span>
+          <span>{finalTotal.toFixed(2)} {texts.sar}</span>
         </div>
       </div>
     </div>
@@ -210,8 +230,8 @@
           <Button size="sm" on:click={callDriver}>
             📞 {texts.callDriver}
           </Button>
-          <Button size="sm" variant="secondary" on:click={chatWithDriver}>
-            💬 {texts.chatDriver}
+          <Button size="sm" variant="secondary" on:click={chatWithSupport}>
+            💬 {texts.chatSupport}
           </Button>
         </div>
       </div>
@@ -272,8 +292,20 @@
     padding: var(--space-4);
   }
 
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+
   .section h3 {
     margin: 0 0 var(--space-4) 0;
+    color: var(--color-ink);
+  }
+
+  .section-header h3 {
+    margin: 0;
     color: var(--color-ink);
   }
 
@@ -331,6 +363,33 @@
   .info-row:last-child {
     border-bottom: none;
     margin-bottom: 0;
+  }
+
+  .summary-rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .summary-row:last-child {
+    border-bottom: none;
+  }
+
+  .total-row {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-primary);
+    border-top: 2px solid var(--color-border);
+    padding-top: var(--space-3);
+    margin-top: var(--space-2);
   }
 
   .label {

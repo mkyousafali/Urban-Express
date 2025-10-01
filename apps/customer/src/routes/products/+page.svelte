@@ -9,6 +9,7 @@
   let searchQuery = '';
   let selectedCategory = 'all';
   let categoryTabsContainer;
+  let selectedUnits = new Map(); // Track selected unit for each product
   
   // Subscribe to cart store reactively
     // Reactive cart items for quantity display - force reactivity
@@ -20,7 +21,7 @@
   let touchEndX = 0;
   let isScrolling = false;
 
-  // Load language from localStorage
+  // Initialize selected units with first unit of each product
   onMount(() => {
     const savedLanguage = localStorage.getItem('language');
     if (savedLanguage) {
@@ -34,6 +35,14 @@
       selectedCategory = categoryParam;
     }
 
+    // Initialize selected units
+    products.forEach(product => {
+      if (product.units && product.units.length > 0) {
+        selectedUnits.set(product.id, product.units[0]);
+      }
+    });
+    selectedUnits = selectedUnits; // Trigger reactivity
+
     // Add touch event listeners for category tabs
     if (categoryTabsContainer) {
       categoryTabsContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -41,6 +50,107 @@
       categoryTabsContainer.addEventListener('touchend', handleTouchEnd, { passive: true });
     }
   });
+
+  // Get selected unit for a product
+  function getSelectedUnit(product) {
+    // New structure with baseUnit + additionalUnits
+    if (product.baseUnit) {
+      const selectedUnitId = selectedUnits.get(product.id);
+      
+      // Check if base unit is selected
+      if (!selectedUnitId || selectedUnitId === 'base') {
+        return product.baseUnit;
+      }
+      
+      // Check additional units
+      if (product.additionalUnits) {
+        const foundUnit = product.additionalUnits.find(unit => unit.id === selectedUnitId);
+        if (foundUnit) return foundUnit;
+      }
+      
+      // Default to base unit
+      return product.baseUnit;
+    }
+    
+    // Legacy support for old units array structure
+    if (product.units && product.units.length > 0) {
+      const selectedUnitId = selectedUnits.get(product.id);
+      return product.units.find(unit => unit.id === selectedUnitId) || product.units[0];
+    }
+    
+    // Fallback for very old format products
+    return {
+      id: 'legacy',
+      nameAr: `${product.size || ''} ${product.sizeUnit || 'حبة'}`,
+      nameEn: `${product.size || ''} ${product.sizeUnitEn || 'piece'}`,
+      unitAr: product.unit || 'حبة',
+      unitEn: product.unitEn || 'piece',
+      basePrice: product.basePrice || 0,
+      originalPrice: product.originalPrice,
+      stock: product.stock || 0,
+      lowStockThreshold: product.lowStockThreshold || 5,
+      barcode: product.barcode || '',
+      photo: null
+    };
+  }
+
+  // Select a unit for a product
+  function selectUnit(productId, unit) {
+    selectedUnits.set(productId, unit.id);
+    selectedUnits = selectedUnits; // Trigger reactivity
+  }
+
+  // Get all available units for a product (base + additional)
+  function getAllUnits(product) {
+    if (product.baseUnit) {
+      const units = [product.baseUnit];
+      if (product.additionalUnits && product.additionalUnits.length > 0) {
+        units.push(...product.additionalUnits);
+      }
+      return units;
+    }
+    // Legacy support
+    return product.units || [];
+  }
+
+  // Check if product has multiple units (should show selection)
+  function hasMultipleUnits(product) {
+    return getAllUnits(product).length > 1;
+  }
+
+  // Get stock for current selected unit
+  function getSelectedUnitStock(product) {
+    const selectedUnit = getSelectedUnit(product);
+    return selectedUnit.stock || 0;
+  }
+
+  // Check if selected unit is out of stock
+  function isOutOfStock(product) {
+    return getSelectedUnitStock(product) === 0;
+  }
+
+  // Check if selected unit has low stock
+  function isLowStock(product) {
+    const selectedUnit = getSelectedUnit(product);
+    const stock = selectedUnit.stock || 0;
+    const threshold = selectedUnit.lowStockThreshold || 5;
+    return stock > 0 && stock <= threshold;
+  }
+
+  // Get stock status text
+  function getStockStatusText(product) {
+    const selectedUnit = getSelectedUnit(product);
+    const stock = selectedUnit.stock || 0;
+    const unitName = currentLanguage === 'ar' ? selectedUnit.nameAr : selectedUnit.nameEn;
+    
+    if (stock === 0) {
+      return currentLanguage === 'ar' ? 'نفد المخزون' : 'Out of Stock';
+    }
+    if (isLowStock(product)) {
+      return currentLanguage === 'ar' ? `${stock} x ${unitName} فقط متبقي` : `Only ${stock} x ${unitName} left`;
+    }
+    return currentLanguage === 'ar' ? `${stock} x ${unitName} متوفر` : `${stock} x ${unitName} available`;
+  }
 
   // Touch gesture handlers
   function handleTouchStart(e) {
@@ -122,16 +232,53 @@
       category: 'fresh-produce',
       nameAr: 'طماطم طازجة محلية',
       nameEn: 'Fresh Local Tomatoes',
-      size: '1',
-      sizeUnit: 'كيلو',
-      sizeUnitEn: 'kg',
       descriptionAr: 'طماطم طازجة عالية الجودة',
       descriptionEn: 'Fresh high-quality tomatoes',
-      basePrice: 8.50,
-      originalPrice: 12.00, // 29% off
-      unit: 'كيلو',
-      unitEn: 'kilogram',
-      icon: '🍅'
+      icon: '🍅',
+      // Base unit - always exists
+      baseUnit: {
+        id: 'base',
+        nameAr: '1 كيلو',
+        nameEn: '1 kg',
+        unitAr: 'كيلو',
+        unitEn: 'kilogram',
+        basePrice: 8.50,
+        originalPrice: 12.00,
+        stock: 25, // Admin can set stock for each unit
+        lowStockThreshold: 5, // When to show low stock warning
+        barcode: '123456789001',
+        photo: null,
+        isBase: true
+      },
+      // Additional units - admin can create up to 3 more
+      additionalUnits: [
+        {
+          id: 'unit_2',
+          nameAr: '500 جرام',
+          nameEn: '500 g',
+          unitAr: 'علبة',
+          unitEn: 'pack',
+          basePrice: 4.75,
+          originalPrice: 6.00,
+          stock: 50, // Different stock for each unit
+          lowStockThreshold: 10,
+          barcode: '123456789002',
+          photo: null
+        },
+        {
+          id: 'unit_3',
+          nameAr: '2 كيلو',
+          nameEn: '2 kg',
+          unitAr: 'كيس',
+          unitEn: 'bag',
+          basePrice: 15.00,
+          originalPrice: 20.00,
+          stock: 8, // Low stock example
+          lowStockThreshold: 5,
+          barcode: '123456789003',
+          photo: null
+        }
+      ]
     },
     {
       id: 2,
@@ -147,11 +294,229 @@
       originalPrice: null,
       unit: 'كيلو',
       unitEn: 'kilogram',
+      stock: 15, // Add stock for legacy products
+      lowStockThreshold: 3,
       icon: '🍌'
+    },
+    {
+      id: 3,
+      category: 'fresh-produce',
+      nameAr: 'تفاح أحمر طازج',
+      nameEn: 'Fresh Red Apples',
+      descriptionAr: 'تفاح أحمر حلو ومقرمش',
+      descriptionEn: 'Sweet and crispy red apples',
+      icon: '🍎',
+      // Single unit product (no selection needed)
+      baseUnit: {
+        id: 'base',
+        nameAr: '1 كيلو',
+        nameEn: '1 kg',
+        unitAr: 'كيلو',
+        unitEn: 'kilogram',
+        basePrice: 14.50,
+        originalPrice: null,
+        stock: 12,
+        lowStockThreshold: 5,
+        barcode: '123456789004',
+        photo: null,
+        isBase: true
+      }
+      // No additional units - shows only base unit
+    },
+    {
+      id: 4,
+      category: 'dairy',
+      nameAr: 'حليب طازج',
+      nameEn: 'Fresh Milk',
+      descriptionAr: 'حليب طازج كامل الدسم',
+      descriptionEn: 'Fresh full-fat milk',
+      icon: '🥛',
+      baseUnit: {
+        id: 'base',
+        nameAr: '1 لتر',
+        nameEn: '1 liter',
+        unitAr: 'لتر',
+        unitEn: 'liter',
+        basePrice: 6.75,
+        originalPrice: 8.00,
+        stock: 0, // Out of stock
+        lowStockThreshold: 3,
+        barcode: '123456789005',
+        photo: null,
+        isBase: true
+      },
+      additionalUnits: [
+        {
+          id: 'unit_2',
+          nameAr: '500 مل',
+          nameEn: '500 ml',
+          unitAr: 'زجاجة',
+          unitEn: 'bottle',
+          basePrice: 3.50,
+          originalPrice: null,
+          stock: 18,
+          lowStockThreshold: 5,
+          barcode: '123456789006',
+          photo: null
+        },
+        {
+          id: 'unit_3',
+          nameAr: '2 لتر',
+          nameEn: '2 liter',
+          unitAr: 'علبة',
+          unitEn: 'carton',
+          basePrice: 12.00,
+          originalPrice: 15.00,
+          stock: 3, // Low stock
+          lowStockThreshold: 5,
+          barcode: '123456789007',
+          photo: null
+        }
+      ]
+    },
+    {
+      id: 5,
+      category: 'bakery',
+      nameAr: 'خبز أبيض طازج',
+      nameEn: 'Fresh White Bread',
+      descriptionAr: 'خبز أبيض طازج مخبوز يومياً',
+      descriptionEn: 'Fresh white bread baked daily',
+      icon: '🍞',
+      baseUnit: {
+        id: 'base',
+        nameAr: '1 رغيف',
+        nameEn: '1 loaf',
+        unitAr: 'رغيف',
+        unitEn: 'loaf',
+        basePrice: 2.50,
+        originalPrice: null,
+        stock: 45,
+        lowStockThreshold: 10,
+        barcode: '123456789008',
+        photo: null,
+        isBase: true
+      },
+      additionalUnits: [
+        {
+          id: 'unit_2',
+          nameAr: '6 أرغفة',
+          nameEn: '6 loaves',
+          unitAr: 'كيس',
+          unitEn: 'pack',
+          basePrice: 13.50,
+          originalPrice: 15.00,
+          stock: 8,
+          lowStockThreshold: 5,
+          barcode: '123456789009',
+          photo: null
+        }
+      ]
+    },
+    {
+      id: 6,
+      category: 'meat',
+      nameAr: 'لحم بقري طازج',
+      nameEn: 'Fresh Beef',
+      descriptionAr: 'لحم بقري طازج عالي الجودة',
+      descriptionEn: 'High quality fresh beef',
+      icon: '🥩',
+      baseUnit: {
+        id: 'base',
+        nameAr: '500 جرام',
+        nameEn: '500 g',
+        unitAr: 'جرام',
+        unitEn: 'gram',
+        basePrice: 45.00,
+        originalPrice: 50.00,
+        stock: 15,
+        lowStockThreshold: 5,
+        barcode: '123456789010',
+        photo: null,
+        isBase: true
+      },
+      additionalUnits: [
+        {
+          id: 'unit_2',
+          nameAr: '1 كيلو',
+          nameEn: '1 kg',
+          unitAr: 'كيلو',
+          unitEn: 'kilogram',
+          basePrice: 85.00,
+          originalPrice: 95.00,
+          stock: 6,
+          lowStockThreshold: 3,
+          barcode: '123456789011',
+          photo: null
+        },
+        {
+          id: 'unit_3',
+          nameAr: '250 جرام',
+          nameEn: '250 g',
+          unitAr: 'علبة',
+          unitEn: 'pack',
+          basePrice: 24.00,
+          originalPrice: null,
+          stock: 0, // Out of stock
+          lowStockThreshold: 5,
+          barcode: '123456789012',
+          photo: null
+        }
+      ]
+    },
+    {
+      id: 7,
+      category: 'snacks',
+      nameAr: 'شيبس بطاطس',
+      nameEn: 'Potato Chips',
+      descriptionAr: 'شيبس بطاطس مقرمش بنكهة الملح',
+      descriptionEn: 'Crispy potato chips with salt flavor',
+      icon: '🍟',
+      baseUnit: {
+        id: 'base',
+        nameAr: '150 جرام',
+        nameEn: '150 g',
+        unitAr: 'كيس',
+        unitEn: 'bag',
+        basePrice: 4.75,
+        originalPrice: null,
+        stock: 2, // Low stock
+        lowStockThreshold: 5,
+        barcode: '123456789013',
+        photo: null,
+        isBase: true
+      },
+      additionalUnits: [
+        {
+          id: 'unit_2',
+          nameAr: '75 جرام',
+          nameEn: '75 g',
+          unitAr: 'كيس صغير',
+          unitEn: 'small bag',
+          basePrice: 2.50,
+          originalPrice: null,
+          stock: 25,
+          lowStockThreshold: 8,
+          barcode: '123456789014',
+          photo: null
+        },
+        {
+          id: 'unit_3',
+          nameAr: '300 جرام',
+          nameEn: '300 g',
+          unitAr: 'كيس عائلي',
+          unitEn: 'family pack',
+          basePrice: 8.50,
+          originalPrice: 10.00,
+          stock: 12,
+          lowStockThreshold: 4,
+          barcode: '123456789015',
+          photo: null
+        }
+      ]
     },
     // Dairy Products
     {
-      id: 3,
+      id: 8,
       category: 'dairy',
       nameAr: 'المراعي كريمة طبخ كاملة الدسم',
       nameEn: 'Almarai Cooking Cream Full Fat',
@@ -167,7 +532,7 @@
       icon: '🥛'
     },
     {
-      id: 4,
+      id: 12,
       category: 'dairy',
       nameAr: 'المراعي لبنة فاخرة كاملة الدسم',
       nameEn: 'Almarai Premium Labneh Full Fat',
@@ -184,7 +549,7 @@
     },
     // Bakery
     {
-      id: 5,
+      id: 13,
       category: 'bakery',
       nameAr: 'خبز التوست الأبيض',
       nameEn: 'White Toast Bread',
@@ -200,7 +565,7 @@
       icon: '🍞'
     },
     {
-      id: 6,
+      id: 14,
       category: 'bakery',
       nameAr: 'كرواسون بالزبدة',
       nameEn: 'Butter Croissant',
@@ -217,7 +582,7 @@
     },
     // Snacks & Beverages
     {
-      id: 7,
+      id: 15,
       category: 'snacks-beverages',
       nameAr: 'شيبس ليز بطعم الجبن',
       nameEn: 'Lays Cheese Flavor Chips',
@@ -233,7 +598,7 @@
       icon: '🍟'
     },
     {
-      id: 8,
+      id: 16,
       category: 'snacks-beverages',
       nameAr: 'كوكا كولا 330 مل',
       nameEn: 'Coca Cola 330ml',
@@ -247,7 +612,7 @@
     },
     // Frozen Foods
     {
-      id: 9,
+      id: 17,
       category: 'frozen-foods',
       nameAr: 'ناجتس الدجاج المجمد 1 كيلو',
       nameEn: 'Frozen Chicken Nuggets 1kg',
@@ -261,7 +626,7 @@
     },
     // Household Essentials
     {
-      id: 10,
+      id: 18,
       category: 'household-essentials',
       nameAr: 'سائل تنظيف الأطباق 1 لتر',
       nameEn: 'Dishwashing Liquid 1L',
@@ -275,7 +640,7 @@
     },
     // Personal Care
     {
-      id: 11,
+      id: 19,
       category: 'personal-care',
       nameAr: 'شامبو للشعر الجاف 400 مل',
       nameEn: 'Dry Hair Shampoo 400ml',
@@ -458,7 +823,8 @@
   <!-- Products Grid -->
   <div class="products-grid">
     {#each filteredProducts as product (product.id)}
-      <div class="product-card" on:click={() => goToProductDetail(product.id)}>
+      {@const selectedUnit = getSelectedUnit(product)}
+      <div class="product-card {isOutOfStock(product) ? 'out-of-stock' : ''}" on:click={() => !isOutOfStock(product) && goToProductDetail(product.id)}>
         <div class="product-image">
           <div class="product-icon">{product.icon}</div>
         </div>
@@ -467,22 +833,68 @@
           <div class="product-info">
             <h3>{currentLanguage === 'ar' ? product.nameAr : product.nameEn}</h3>
             
+            <!-- Show selected unit size -->
             <div class="product-size">
-              {product.size} {currentLanguage === 'ar' ? product.sizeUnit : product.sizeUnitEn}
+              {currentLanguage === 'ar' ? selectedUnit.nameAr : selectedUnit.nameEn}
             </div>
             
             <div class="product-pricing">
               <div class="current-price">
-                {product.basePrice.toFixed(2)} {texts.sar}
+                {selectedUnit.basePrice.toFixed(2)} {texts.sar}
               </div>
-              {#if product.originalPrice}
-                <div class="original-price">{product.originalPrice.toFixed(2)} {texts.sar}</div>
+              {#if selectedUnit.originalPrice && selectedUnit.originalPrice > selectedUnit.basePrice}
+                <div class="original-price">{selectedUnit.originalPrice.toFixed(2)} {texts.sar}</div>
               {/if}
             </div>
             
-            <div class="unit-info">
-              / {currentLanguage === 'ar' ? product.unit : product.unitEn}
+            <!-- Stock Status -->
+            <div class="stock-info {isOutOfStock(product) ? 'out-of-stock' : isLowStock(product) ? 'low-stock' : 'in-stock'}">
+              {getStockStatusText(product)}
             </div>
+            
+            <!-- Unit selection buttons - only show if multiple units available -->
+            {#if hasMultipleUnits(product)}
+              <div class="unit-buttons-container">
+                <div class="unit-buttons">
+                  {#each getAllUnits(product) as unit}
+                    {@const unitStock = unit.stock || 0}
+                    {@const isUnitOutOfStock = unitStock === 0}
+                    {@const isUnitLowStock = unitStock > 0 && unitStock <= (unit.lowStockThreshold || 5)}
+                    <button 
+                      class="unit-button {selectedUnit.id === unit.id ? 'active' : ''} {isUnitOutOfStock ? 'out-of-stock' : ''}"
+                      disabled={isUnitOutOfStock}
+                      on:click={(e) => {
+                        e.stopPropagation();
+                        if (!isUnitOutOfStock) {
+                          selectUnit(product.id, unit);
+                        }
+                      }}
+                    >
+                      <span class="unit-name">
+                        {currentLanguage === 'ar' ? unit.nameAr : unit.nameEn}
+                      </span>
+                      <span class="unit-price">
+                        {unit.basePrice.toFixed(2)} {texts.sar}
+                      </span>
+                      <span class="unit-stock {isUnitOutOfStock ? 'out-of-stock' : isUnitLowStock ? 'low-stock' : 'in-stock'}">
+                        {#if isUnitOutOfStock}
+                          {currentLanguage === 'ar' ? 'نفد' : 'Out'}
+                        {:else if isUnitLowStock}
+                          {unitStock}
+                        {:else}
+                          ✓
+                        {/if}
+                      </span>
+                    </button>
+                  {/each}
+                </div>
+              </div>
+            {:else}
+              <!-- Show unit type when only one unit available -->
+              <div class="unit-info">
+                / {currentLanguage === 'ar' ? selectedUnit.unitAr : selectedUnit.unitEn}
+              </div>
+            {/if}
           </div>
           
           <div class="product-actions">
@@ -491,7 +903,7 @@
               <button 
                 class="quantity-btn" 
                 on:click={(event) => decreaseQuantity(product.id, event)}
-                disabled={(cartItemsMap.get(String(product.id)) || 0) === 0}
+                disabled={(cartItemsMap.get(String(product.id)) || 0) === 0 || isOutOfStock(product)}
               >
                 −
               </button>
@@ -501,6 +913,7 @@
               <button 
                 class="quantity-btn" 
                 on:click={(event) => increaseQuantity(product.id, event)}
+                disabled={isOutOfStock(product) || (cartItemsMap.get(String(product.id)) || 0) >= getSelectedUnitStock(product)}
               >
                 +
               </button>
@@ -786,6 +1199,174 @@
     margin-bottom: 0.5rem;
   }
 
+  .unit-selector {
+    margin-bottom: 0.5rem;
+  }
+
+  .unit-buttons-container {
+    margin-top: 0.5rem;
+  }
+
+  .unit-buttons {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .unit-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem 0.7rem;
+    border: 2px solid var(--color-border);
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 60px;
+    font-size: 0.8rem;
+    position: relative;
+  }
+
+  .unit-button:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
+    transform: translateY(-1px);
+  }
+
+  .unit-button.active {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .unit-button .unit-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .unit-button .unit-price {
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0.8;
+    margin-bottom: 0.2rem;
+  }
+
+  .unit-button .unit-stock {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.1rem 0.3rem;
+    border-radius: 4px;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .unit-stock.in-stock {
+    background: rgba(45, 125, 50, 0.1);
+    color: #2d7d32;
+  }
+
+  .unit-stock.low-stock {
+    background: rgba(245, 124, 0, 0.1);
+    color: #f57c00;
+  }
+
+  .unit-stock.out-of-stock {
+    background: rgba(211, 47, 47, 0.1);
+    color: #d32f2f;
+  }
+
+  .unit-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f5f5f5;
+  }
+
+  .unit-button:disabled:hover {
+    transform: none;
+    border-color: var(--color-border);
+    background: #f5f5f5;
+  }
+
+  .unit-button.active .unit-name,
+  .unit-button.active .unit-price {
+    color: white;
+  }
+
+  .unit-button.active .unit-stock {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+
+  .unit-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-bottom: 0.3rem;
+  }
+
+  .unit-select {
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    background: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg fill='%23666' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 16px;
+    padding-right: 2.5rem;
+  }
+
+  [dir="rtl"] .unit-select {
+    background-position: left 0.7rem center;
+    padding-right: 0.7rem;
+    padding-left: 2.5rem;
+  }
+
+  .unit-select:hover,
+  .unit-select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+  }
+
+  .unit-select-inline {
+    background: transparent;
+    border: none;
+    font-size: 0.85rem;
+    color: var(--color-ink-light);
+    font-style: italic;
+    cursor: pointer;
+    padding: 0;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg fill='%23999' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.2rem center;
+    background-size: 12px;
+    padding-right: 1.2rem;
+  }
+
+  [dir="rtl"] .unit-select-inline {
+    background-position: left 0.2rem center;
+    padding-right: 0;
+    padding-left: 1.2rem;
+  }
+
+  .unit-select-inline:hover,
+  .unit-select-inline:focus {
+    color: var(--color-primary);
+    outline: none;
+  }
+
   .product-pricing {
     display: flex;
     align-items: baseline;
@@ -809,6 +1390,41 @@
     font-size: 0.85rem;
     color: var(--color-ink-light);
     font-style: italic;
+  }
+
+  .stock-info {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.3rem 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+
+  .stock-info.in-stock {
+    background: #e8f5e8;
+    color: #2d7d32;
+  }
+
+  .stock-info.low-stock {
+    background: #fff3e0;
+    color: #f57c00;
+  }
+
+  .stock-info.out-of-stock {
+    background: #ffebee;
+    color: #d32f2f;
+  }
+
+  .product-card.out-of-stock {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .product-card.out-of-stock:hover {
+    transform: none;
+    border-color: var(--color-border);
+    box-shadow: none;
   }
 
   /* Small mobile screens */
