@@ -1,0 +1,110 @@
+{
+  "name": "urban-express",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Urban Express delivery management system with Customer, Driver, and Admin PWAs",
+  "author": "Urban Express Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n customer,driver,admin -c blue,green,yellow \"npm run dev:customer\" \"npm run dev:driver\" \"npm run dev:admin\"",
+    "dev:customer": "cd apps/customer && npm run dev -- --port 3000",
+    "dev:driver": "cd apps/driver && npm run dev -- --port 3001",
+    "dev:admin": "cd apps/admin && npm run dev -- --port 3002",
+    "build": "npm run build:packages && npm run build:apps",
+    "build:packages": "npm run build --workspace=packages/*",
+    "build:apps": "npm run build --workspace=apps/*",
+    "preview": "npm run preview --workspace=apps/*",
+    "test": "vitest",
+    "test:e2e": "playwright test",
+    "test:coverage": "vitest --coverage",
+    "test:ui": "vitest --ui",
+    "lint": "eslint . --ext .ts,.svelte --fix",
+    "lint:check": "eslint . --ext .ts,.svelte",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:migrate": "supabase db push",
+    "db:seed": "supabase db seed",
+    "db:generate-types": "supabase gen types typescript --local > packages/data/src/types/database.ts",
+    "db:dump": "supabase db dump --local",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "prepare": "husky install",
+    "postinstall": "npm run db:generate-types",
+    "clean": "rimraf dist build coverage .nyc_output node_modules/.cache",
+    "clean:all": "npm run clean && rimraf node_modules apps/*/node_modules packages/*/node_modules",
+    "setup": "npm install && npm run db:start && npm run db:migrate && npm run db:seed",
+    "deploy:staging": "./scripts/deploy.sh staging",
+    "deploy:production": "./scripts/deploy.sh production"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@storybook/addon-essentials": "^7.6.0",
+    "@storybook/addon-interactions": "^7.6.0",
+    "@storybook/addon-links": "^7.6.0",
+    "@storybook/blocks": "^7.6.0",
+    "@storybook/svelte": "^7.6.0",
+    "@storybook/svelte-vite": "^7.6.0",
+    "@storybook/testing-library": "^0.2.2",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "@vitest/ui": "^1.0.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-storybook": "^0.6.15",
+    "eslint-plugin-svelte": "^2.35.1",
+    "husky": "^8.0.3",
+    "jsdom": "^23.0.1",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.1.1",
+    "prettier-plugin-svelte": "^3.1.2",
+    "rimraf": "^5.0.5",
+    "storybook": "^7.6.0",
+    "supabase": "^1.120.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "lint-staged": {
+    "*.{js,ts,svelte}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,html}": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "delivery",
+    "pwa",
+    "svelte",
+    "typescript",
+    "supabase",
+    "bilingual",
+    "arabic",
+    "saudi-arabia",
+    "mobile-first",
+    "cash-management"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/urban-express.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/urban-express/issues"
+  },
+  "homepage": "https://github.com/your-org/urban-express#readme"
+}

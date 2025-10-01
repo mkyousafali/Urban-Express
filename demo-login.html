@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Urban Express - Customer Login Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Colors */
+      --color-primary: #10B981;
+      --color-primary-dark: #047857;
+      --color-primary-light: #D1FAE5;
+      --color-success: #10B981;
+      --color-success-light: #D1FAE5;
+      --color-danger: #EF4444;
+      --color-danger-light: #FEE2E2;
+      --color-warning: #F59E0B;
+      --color-info: #3B82F6;
+      --color-ink: #111827;
+      --color-ink-light: #6B7280;
+      --color-ink-lighter: #9CA3AF;
+      --color-sky: #F8FAFC;
+      --color-surface: #F9FAFB;
+      --color-border: #E5E7EB;
+
+      /* Spacing */
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+
+      /* Typography */
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: linear-gradient(135deg, #10B981 0%, #047857 100%);
+      min-height: 100vh;
+      color: var(--color-ink);
+    }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-4);
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      overflow: hidden;
+    }
+
+    .logo-section {
+      text-align: center;
+      padding: var(--space-8);
+      background: linear-gradient(135deg, #10B981 0%, #047857 100%);
+      color: white;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      margin: 0 auto var(--space-4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: var(--space-2);
+    }
+
+    .tagline {
+      opacity: 0.9;
+      font-size: 1rem;
+    }
+
+    .form-content {
+      padding: var(--space-8);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: var(--space-6);
+      text-align: center;
+      color: var(--color-ink);
+    }
+
+    .demo-banner {
+      background: linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%);
+      border: 1px solid #16A34A;
+      border-radius: 1rem;
+      padding: var(--space-4);
+      margin-bottom: var(--space-6);
+      text-align: right;
+    }
+
+    .demo-banner h3 {
+      color: #15803D;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+    }
+
+    .demo-banner p {
+      color: #166534;
+      font-size: 0.875rem;
+      margin-bottom: var(--space-3);
+    }
+
+    .demo-credentials {
+      background: white;
+      border-radius: 0.5rem;
+      padding: var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+
+    .credential-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--space-1);
+      font-size: 0.875rem;
+    }
+
+    .credential-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      color: var(--color-ink-light);
+    }
+
+    .value {
+      font-family: monospace;
+      color: var(--color-ink);
+      font-weight: 600;
+      direction: ltr;
+    }
+
+    .form-group {
+      margin-bottom: var(--space-4);
+    }
+
+    label {
+      display: block;
+      margin-bottom: var(--space-2);
+      font-weight: 500;
+      color: var(--color-ink);
+      text-align: right;
+    }
+
+    input {
+      width: 100%;
+      padding: var(--space-3);
+      border: 1px solid var(--color-border);
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      transition: border-color 0.2s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: var(--space-3);
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: var(--space-4);
+    }
+
+    .btn:hover {
+      background: linear-gradient(135deg, var(--color-primary-dark) 0%, #065F46 100%);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+      color: var(--color-ink);
+      font-size: 0.875rem;
+      padding: var(--space-2) var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+
+    .btn-secondary:hover {
+      background: linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%);
+    }
+
+    .success-message {
+      background: var(--color-success-light);
+      color: var(--color-success);
+      padding: var(--space-3);
+      border-radius: 0.5rem;
+      margin-top: var(--space-4);
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .form-footer {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      text-align: center;
+    }
+
+    .link {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: var(--space-2);
+      }
+      
+      .form-content {
+        padding: var(--space-6);
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="login-card">
+      <!-- Logo Section -->
+      <div class="logo-section">
+        <div class="logo">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 12L16 18L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 18V6" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <path d="M6 26H26" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h1>Urban Express</h1>
+        <p class="tagline">توصيل سريع، خدمة موثوقة</p>
+      </div>
+
+      <!-- Form Content -->
+      <div class="form-content">
+        <h2>تسجيل الدخول</h2>
+        
+        <!-- Demo Banner -->
+        <div class="demo-banner">
+          <h3>🎯 حساب تجريبي</h3>
+          <p>للتجربة السريعة، استخدم البيانات التالية:</p>
+          <div class="demo-credentials">
+            <div class="credential-item">
+              <span class="label">رقم الواتساب:</span>
+              <span class="value">0501234567</span>
+            </div>
+            <div class="credential-item">
+              <span class="label">كلمة المرور:</span>
+              <span class="value">demo123</span>
+            </div>
+          </div>
+          <button class="btn btn-secondary" onclick="fillDemo()">
+            املأ البيانات تلقائياً
+          </button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="whatsapp">رقم الواتساب</label>
+            <input type="tel" id="whatsapp" placeholder="05xxxxxxxx" dir="ltr" required>
+          </div>
+
+          <div class="form-group">
+            <label for="password">كلمة المرور</label>
+            <input type="password" id="password" placeholder="أدخل كلمة المرور" required>
+          </div>
+
+          <button type="submit" class="btn">تسجيل الدخول</button>
+        </form>
+
+        <div id="success" class="success-message" style="display: none;">
+          ✅ تم تسجيل الدخول بنجاح! مرحباً بك في Urban Express
+        </div>
+
+        <div class="form-footer">
+          <a href="#" class="link">إنشاء حساب جديد</a>
+          <a href="#" class="link">نسيت كلمة المرور؟</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Demo credentials
+    const demoCredentials = {
+      whatsapp: '0501234567',
+      password: 'demo123'
+    };
+
+    // Fill demo credentials
+    function fillDemo() {
+      document.getElementById('whatsapp').value = demoCredentials.whatsapp;
+      document.getElementById('password').value = demoCredentials.password;
+    }
+
+    // Format WhatsApp number
+    document.getElementById('whatsapp').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      
+      // Ensure it starts with 05
+      if (value.length > 0 && !value.startsWith('05')) {
+        value = '05' + value;
+      }
+      
+      // Limit to 10 digits
+      value = value.slice(0, 10);
+      e.target.value = value;
+    });
+
+    // Handle form submission
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const whatsapp = document.getElementById('whatsapp').value;
+      const password = document.getElementById('password').value;
+      
+      // Validate demo credentials
+      if (whatsapp === demoCredentials.whatsapp && password === demoCredentials.password) {
+        document.getElementById('success').style.display = 'block';
+        document.getElementById('loginForm').style.display = 'none';
+        
+        // Simulate redirect after 2 seconds
+        setTimeout(() => {
+          alert('في التطبيق الحقيقي، سيتم توجيهك إلى الصفحة الرئيسية');
+        }, 2000);
+      } else {
+        alert('رقم الواتساب أو كلمة المرور غير صحيحة');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    
+    // Strict Type Checking
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    
+    // Module Resolution
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    
+    // Path Mapping
+    "baseUrl": ".",
+    "paths": {
+      "@urban-express/ui": ["./packages/ui/src/index.ts"],
+      "@urban-express/ui/*": ["./packages/ui/src/*"],
+      "@urban-express/data": ["./packages/data/src/index.ts"],
+      "@urban-express/data/*": ["./packages/data/src/*"],
+      "@urban-express/logic": ["./packages/logic/src/index.ts"],
+      "@urban-express/logic/*": ["./packages/logic/src/*"],
+      "@urban-express/i18n": ["./packages/i18n/src/index.ts"],
+      "@urban-express/i18n/*": ["./packages/i18n/src/*"],
+      "@urban-express/notifications": ["./packages/notifications/src/index.ts"],
+      "@urban-express/notifications/*": ["./packages/notifications/src/*"],
+      "@urban-express/chat": ["./packages/chat/src/index.ts"],
+      "@urban-express/chat/*": ["./packages/chat/src/*"],
+      "$lib": ["./src/lib"],
+      "$lib/*": ["./src/lib/*"],
+      "$app/*": ["./node_modules/@sveltejs/kit/src/runtime/app/*"]
+    },
+    
+    // Type Definitions
+    "types": [
+      "node",
+      "vite/client",
+      "@sveltejs/kit",
+      "unplugin-icons/types/svelte"
+    ]
+  },
+  "include": [
+    "apps/*/src/**/*",
+    "packages/*/src/**/*",
+    "*.config.js",
+    "*.config.ts",
+    ".storybook/**/*",
+    "tests/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    ".nyc_output",
+    "**/.svelte-kit/**",
+    "**/node_modules/**"
+  ]
+}
