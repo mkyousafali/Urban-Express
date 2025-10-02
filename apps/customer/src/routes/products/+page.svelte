@@ -717,8 +717,23 @@
   }
 
   function handleAddToCart(product) {
+    // Get the currently selected unit with price info
+    const selectedUnit = getSelectedUnit(product);
+    
+    // Create a cart-compatible item with standardized price fields
+    const cartItem = {
+      ...product,
+      basePrice: selectedUnit.basePrice || product.basePrice || 0,
+      originalPrice: selectedUnit.originalPrice || product.originalPrice,
+      selectedUnitId: selectedUnit.id,
+      selectedUnitName: currentLanguage === 'ar' ? selectedUnit.nameAr : selectedUnit.nameEn,
+      unit: currentLanguage === 'ar' ? selectedUnit.unitAr : selectedUnit.unitEn,
+      unitEn: selectedUnit.unitEn,
+      stock: selectedUnit.stock || product.stock || 0
+    };
+    
     // Add item with quantity 1 to cart
-    cartActions.addItem(product, 1);
+    cartActions.addItem(cartItem, 1);
   }
 
   function handleAddToCartClick(event, product) {
@@ -734,7 +749,22 @@
     // Update cart directly
     const product = filteredProducts.find(p => p.id === productId);
     if (product) {
-      cartActions.setItemQuantity(product, newQuantity);
+      // Get the currently selected unit with price info
+      const selectedUnit = getSelectedUnit(product);
+      
+      // Create a cart-compatible item with standardized price fields
+      const cartItem = {
+        ...product,
+        basePrice: selectedUnit.basePrice || product.basePrice || 0,
+        originalPrice: selectedUnit.originalPrice || product.originalPrice,
+        selectedUnitId: selectedUnit.id,
+        selectedUnitName: currentLanguage === 'ar' ? selectedUnit.nameAr : selectedUnit.nameEn,
+        unit: currentLanguage === 'ar' ? selectedUnit.unitAr : selectedUnit.unitEn,
+        unitEn: selectedUnit.unitEn,
+        stock: selectedUnit.stock || product.stock || 0
+      };
+      
+      cartActions.setItemQuantity(cartItem, newQuantity);
     }
   }
 
@@ -752,7 +782,22 @@
         // Update cart with new quantity
         const product = filteredProducts.find(p => p.id === productId);
         if (product) {
-          cartActions.setItemQuantity(product, newQuantity);
+          // Get the currently selected unit with price info
+          const selectedUnit = getSelectedUnit(product);
+          
+          // Create a cart-compatible item with standardized price fields
+          const cartItem = {
+            ...product,
+            basePrice: selectedUnit.basePrice || product.basePrice || 0,
+            originalPrice: selectedUnit.originalPrice || product.originalPrice,
+            selectedUnitId: selectedUnit.id,
+            selectedUnitName: currentLanguage === 'ar' ? selectedUnit.nameAr : selectedUnit.nameEn,
+            unit: currentLanguage === 'ar' ? selectedUnit.unitAr : selectedUnit.unitEn,
+            unitEn: selectedUnit.unitEn,
+            stock: selectedUnit.stock || product.stock || 0
+          };
+          
+          cartActions.setItemQuantity(cartItem, newQuantity);
         }
       }
     }

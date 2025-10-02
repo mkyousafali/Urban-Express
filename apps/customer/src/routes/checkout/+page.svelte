@@ -272,9 +272,9 @@
   }
 
   // Calculate delivery fee with dynamic tiers
-  $: deliveryFee = calculateDeliveryFee(total, currentTiers);
-  $: finalTotal = total + deliveryFee;
-  $: deliveryFeeDescription = getDeliveryFeeDescription(total, currentTiers, currentLanguage);
+  $: deliveryFee = calculateDeliveryFee(total || 0, currentTiers);
+  $: finalTotal = (total || 0) + (deliveryFee || 0);
+  $: deliveryFeeDescription = getDeliveryFeeDescription(total || 0, currentTiers, currentLanguage);
 </script>
 
 <svelte:head>
@@ -323,9 +323,9 @@
             <div class="item-details">
               <h3>{currentLanguage === 'ar' ? item.nameAr : item.nameEn}</h3>
               <div class="item-price">
-                {item.basePrice.toFixed(2)} {texts.sar}
+                {(item.basePrice || item.price || 0).toFixed(2)} {texts.sar}
                 {#if item.originalPrice}
-                  <span class="original-price">{item.originalPrice.toFixed(2)} {texts.sar}</span>
+                  <span class="original-price">{(item.originalPrice || 0).toFixed(2)} {texts.sar}</span>
                 {/if}
               </div>
               <div class="item-unit">/ {currentLanguage === 'ar' ? item.unit : item.unitEn}</div>
@@ -339,7 +339,7 @@
               </div>
               
               <div class="item-total">
-                {(item.basePrice * item.quantity).toFixed(2)} {texts.sar}
+                {((item.basePrice || item.price || 0) * (item.quantity || 1)).toFixed(2)} {texts.sar}
               </div>
               
               <button class="remove-btn" on:click={() => removeItem(item.id)}>
@@ -356,20 +356,20 @@
       <h2>{texts.orderSummary}</h2>
       <div class="summary-row">
         <span>{texts.subtotal}</span>
-        <span>{total.toFixed(2)} {texts.sar}</span>
+        <span>{(total || 0).toFixed(2)} {texts.sar}</span>
       </div>
       <div class="summary-row">
         <span>{texts.deliveryFee}</span>
         <div class="delivery-fee-container">
-          <span>{deliveryFee === 0 ? texts.free : `${deliveryFee.toFixed(2)} ${texts.sar}`}</span>
-          {#if deliveryFeeDescription !== (deliveryFee === 0 ? texts.free : `${deliveryFee.toFixed(2)} ${texts.sar}`)}
+          <span>{deliveryFee === 0 ? texts.free : `${(deliveryFee || 0).toFixed(2)} ${texts.sar}`}</span>
+          {#if deliveryFeeDescription !== (deliveryFee === 0 ? texts.free : `${(deliveryFee || 0).toFixed(2)} ${texts.sar}`)}
             <small class="delivery-hint">{deliveryFeeDescription}</small>
           {/if}
         </div>
       </div>
       <div class="summary-row total-row">
         <span>{texts.total}</span>
-        <span>{finalTotal.toFixed(2)} {texts.sar}</span>
+        <span>{(finalTotal || 0).toFixed(2)} {texts.sar}</span>
       </div>
     </div>
 

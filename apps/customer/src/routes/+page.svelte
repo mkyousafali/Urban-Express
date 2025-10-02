@@ -48,6 +48,9 @@
       currentLanguage = savedLanguage;
     }
     
+    // Reset video error state on mount
+    videoError = false;
+    
     // Load user information
     userActions.loadFromStorage();
     
@@ -110,8 +113,9 @@
   }
 
   function handleVideoError() {
-    console.log('Video failed to load, showing fallback');
-    videoError = true;
+    console.log('Video failed to load');
+    // Don't show fallback content, keep video area clean
+    videoError = false; // Force video error to false to prevent fallback display
   }
   
   function handleVideoClick() {
@@ -175,14 +179,14 @@
   // Language texts
   $: texts = currentLanguage === 'ar' ? {
     title: 'الرئيسية - Urban Express',
-    greeting: `أهلاً وسهلاً ${userName} 👋`,
+    greeting: `${userName} 👋`,
     subtitle: 'اختر فئة المنتجات التي تريد التسوق منها',
     allCategories: 'جميع المنتجات',
     hideVideo: 'إخفاء الفيديو',
     showVideo: 'إظهار الفيديو'
   } : {
     title: 'Home - Urban Express',
-    greeting: `Welcome ${userName} 👋`,
+    greeting: `${userName} 👋`,
     subtitle: 'Choose a product category to shop from',
     allCategories: 'All Products',
     hideVideo: 'Hide Video',
@@ -208,6 +212,7 @@
     <div class="led-welcome-container">
       <div class="led-border">
         <div class="welcome-content">
+          <img src="/logo.png" alt="Urban Express" class="welcome-logo" />
           <h1 class="welcome-text">{texts.greeting}</h1>
         </div>
       </div>
@@ -219,7 +224,6 @@
     <div class="advertisement-section" bind:this={videoContainer}>
       <div class="led-screen-container">
         <div class="led-frame">
-          <div class="led-border"></div>
           <div class="video-content">
             {#if !videoError}
               <video 
@@ -328,54 +332,62 @@
 <style>
   .home-container {
     padding: 1rem;
+    padding-top: calc(60px + 1rem); /* Increased padding to ensure clear separation from TopBar */
     max-width: 100%;
     margin: 0 auto;
+    min-height: 100vh;
   }
 
   .header-section {
     text-align: center;
-    margin-bottom: 2rem;
-    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+    padding: 1rem 0; /* Increased padding for better visibility */
+    width: 100%;
   }
 
   .led-welcome-container {
     display: flex;
     justify-content: center;
-    margin-bottom: 1rem;
+    align-items: center;
+    margin: 0 auto 1.5rem auto; /* Center and add bottom margin */
+    padding: 0 1rem;
+    width: 100%;
+    max-width: 800px; /* Increased maximum width for better presence */
   }
 
   .led-border {
     position: relative;
-    width: 300px;
-    height: 80px;
-    border-radius: 20px;
-    padding: 6px;
+    width: min(500px, 95vw); /* Significantly wider for better presence */
+    height: 100px; /* Taller to accommodate larger content */
+    border-radius: 25px; /* Larger border radius for proportional scaling */
+    padding: 12px; /* More padding for better content spacing */
     background: linear-gradient(45deg, 
-      var(--color-primary) 0%, 
-      var(--color-primary) 25%, 
-      var(--color-accent) 50%, 
-      var(--color-accent) 75%, 
-      var(--color-primary) 100%
+      #4CAF50 0%, 
+      #4CAF50 25%, 
+      #FF9800 50%, 
+      #FF9800 75%, 
+      #4CAF50 100%
     );
     background-size: 400% 400%;
     animation: ledGlow 3s ease-in-out infinite;
     box-shadow: 
-      0 0 30px rgba(76, 175, 80, 0.4),
-      0 0 60px rgba(255, 152, 0, 0.2),
-      inset 0 0 20px rgba(255, 255, 255, 0.1);
+      0 0 35px rgba(76, 175, 80, 0.5),
+      0 0 70px rgba(255, 152, 0, 0.3),
+      inset 0 0 25px rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 auto; /* Ensure perfect centering */
   }
 
   .led-border::before {
     content: '';
     position: absolute;
-    top: 3px;
-    left: 3px;
-    right: 3px;
-    bottom: 3px;
-    border-radius: 17px;
+    top: 5px; /* Adjusted for larger border */
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border-radius: 20px; /* Adjusted for new border radius */
     background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
     z-index: 1;
   }
@@ -386,52 +398,65 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 1rem; /* Increased gap for wider container */
     width: 100%;
     height: 100%;
+    padding: 0 0.75rem; /* More padding for larger container */
+  }
+
+  .welcome-logo {
+    width: 50px; /* Larger logo for wider container */
+    height: 50px;
+    object-fit: contain;
+    border-radius: 10px; /* Larger border radius */
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0; /* Prevent logo from shrinking */
   }
 
   .welcome-text {
-    font-size: 1.4rem;
+    font-size: clamp(1.3rem, 4.5vw, 1.8rem); /* Larger text for wider container */
     font-weight: 700;
     color: var(--color-primary);
     margin: 0;
     text-align: center;
+    line-height: 1.2;
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
     background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.15));
   }
 
   @keyframes ledGlow {
     0% {
       background-position: 0% 50%;
       box-shadow: 
-        0 0 30px rgba(76, 175, 80, 0.7),
-        0 0 60px rgba(76, 175, 80, 0.4),
-        inset 0 0 20px rgba(255, 255, 255, 0.1);
+        0 0 35px rgba(76, 175, 80, 0.8),
+        0 0 70px rgba(76, 175, 80, 0.5),
+        inset 0 0 25px rgba(255, 255, 255, 0.15);
     }
     50% {
       background-position: 100% 50%;
       box-shadow: 
-        0 0 30px rgba(255, 152, 0, 0.7),
-        0 0 60px rgba(255, 152, 0, 0.4),
-        inset 0 0 20px rgba(255, 255, 255, 0.1);
+        0 0 35px rgba(255, 152, 0, 0.8),
+        0 0 70px rgba(255, 152, 0, 0.5),
+        inset 0 0 25px rgba(255, 255, 255, 0.15);
     }
     100% {
       background-position: 0% 50%;
       box-shadow: 
-        0 0 30px rgba(76, 175, 80, 0.7),
-        0 0 60px rgba(76, 175, 80, 0.4),
-        inset 0 0 20px rgba(255, 255, 255, 0.1);
+        0 0 35px rgba(76, 175, 80, 0.8),
+        0 0 70px rgba(76, 175, 80, 0.5),
+        inset 0 0 25px rgba(255, 255, 255, 0.15);
     }
   }
 
-
-
   /* Advertisement LED Screen Styles */
   .advertisement-section {
-    margin: 2rem 0;
+    margin: 1rem 0 2rem 0;
     padding: 0;
   }
 
@@ -444,26 +469,15 @@
 
   .led-frame {
     position: relative;
-    background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
-    padding: 12px;
+    background: #000; /* Solid black background to prevent white bar */
+    padding: 8px; /* Reduced padding to minimize white space */
     border-radius: 20px;
     box-shadow: 
-      0 0 30px rgba(0, 0, 0, 0.5),
-      inset 0 0 20px rgba(255, 255, 255, 0.1);
+      0 0 30px rgba(0, 0, 0, 0.5);
     border: 2px solid #333;
   }
 
-  .led-border {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-    border: 2px solid #00ff88;
-    border-radius: 16px;
-    opacity: 0.8;
-    animation: ledGlow 2s ease-in-out infinite alternate;
-  }
+  /* LED border removed from LCD screen - only for welcome message */
 
   @keyframes ledGlow {
     from { 
@@ -483,7 +497,10 @@
     aspect-ratio: 9/16; /* CSS aspect ratio for consistent 9:16 */
     border-radius: 12px;
     overflow: hidden;
-    background: #000;
+    background: #000 !important; /* Ensure solid black background */
+    isolation: isolate; /* Create new stacking context */
+    margin: 0; /* Remove any margin */
+    padding: 0; /* Remove any padding */
   }
 
   .video-content video {
@@ -492,6 +509,11 @@
     object-fit: cover;
     cursor: pointer;
     transition: transform 0.3s ease;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1; /* Ensure video is behind overlay elements */
+    border-radius: 12px; /* Match container border radius */
   }
 
   .video-content:hover video {
@@ -501,13 +523,16 @@
   .video-fallback {
     width: 100%;
     height: 100%;
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+    background: transparent; /* Make fallback transparent */
     transition: transform 0.3s ease;
+    z-index: -1; /* Put fallback behind video */
   }
 
   .video-fallback:hover {
@@ -515,6 +540,7 @@
   }
 
   .fallback-content {
+    display: none; /* Hide fallback content completely */
     text-align: center;
     z-index: 2;
     color: #00ff88;
@@ -545,14 +571,12 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-      radial-gradient(circle at 20% 30%, rgba(0, 255, 136, 0.1), transparent 40%),
-      radial-gradient(circle at 80% 70%, rgba(0, 255, 136, 0.1), transparent 40%),
-      radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.05), transparent 60%);
+    background: transparent; /* Remove interfering background */
     z-index: 1;
   }
 
   .video-size-info {
+    display: none; /* Hide for production - these are development info panels */
     position: absolute;
     top: 1rem;
     right: 1rem;
@@ -565,7 +589,7 @@
     font-weight: bold;
     border: 1px solid #00ff88;
     box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-    z-index: 3;
+    z-index: 10;
     text-align: center;
   }
 
@@ -576,6 +600,7 @@
   }
 
   .video-details-info {
+    display: none; /* Hide for production - these are development info panels */
     position: absolute;
     bottom: 1rem;
     left: 1rem;
@@ -588,7 +613,7 @@
     font-weight: bold;
     border: 1px solid #00ff88;
     box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-    z-index: 3;
+    z-index: 10;
     line-height: 1.4;
   }
 
@@ -624,7 +649,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 4;
+    z-index: 5;
     backdrop-filter: blur(10px);
     box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
   }
@@ -645,7 +670,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 4;
+    z-index: 5;
     backdrop-filter: blur(10px);
     box-shadow: 0 0 15px rgba(255, 107, 107, 0.4);
   }
@@ -722,7 +747,8 @@
       radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
     background-size: 8px 8px;
     pointer-events: none;
-    opacity: 0.3;
+    opacity: 0.1; /* Reduced opacity to be less intrusive */
+    z-index: 2; /* Above video but below buttons */
   }
 
   .screen-glow {
@@ -832,29 +858,51 @@
   @media (max-width: 480px) {
     .home-container {
       padding: 0.75rem;
+      padding-top: calc(60px + 0.75rem); /* Adequate mobile padding to clear TopBar */
+    }
+
+    .header-section {
+      padding: 0.75rem 0; /* Better mobile spacing */
+      margin-bottom: 1rem;
+    }
+
+    .led-welcome-container {
+      padding: 0 0.5rem; /* Tighter mobile padding */
+      max-width: 100%; /* Full width on mobile */
     }
 
     .led-border {
-      width: 280px;
-      height: 70px;
-      border-radius: 16px;
-      padding: 5px;
+      width: min(420px, 90vw); /* Wider responsive width for mobile */
+      height: 85px; /* Proportional height for mobile */
+      border-radius: 20px;
+      padding: 10px;
+      margin: 0 auto; /* Force centering on mobile */
+    }
+
+    .welcome-logo {
+      width: 38px; /* Proportionally larger for mobile */
+      height: 38px;
+    }
+
+    .welcome-content {
+      gap: 0.75rem; /* Proportional gap on mobile */
+      padding: 0 0.5rem;
     }
 
     .led-border::before {
-      top: 2px;
-      left: 2px;
-      right: 2px;
-      bottom: 2px;
-      border-radius: 14px;
+      top: 4px;
+      left: 4px;
+      right: 4px;
+      bottom: 4px;
+      border-radius: 16px;
     }
 
     .welcome-text {
-      font-size: 1.2rem;
+      font-size: clamp(1.1rem, 4vw, 1.4rem); /* Larger mobile text scaling */
     }
 
     .advertisement-section {
-      margin: 1.5rem 0;
+      margin: 1rem 0 1.5rem 0;
     }
 
     .led-screen-container {
@@ -900,7 +948,8 @@
     }
 
     .led-frame {
-      padding: 8px;
+      padding: 6px; /* Minimal padding for mobile */
+      margin: 0 auto; /* Center the LED frame */
     }
 
     .category-card {
@@ -923,16 +972,46 @@
     .home-container {
       max-width: 800px;
       padding: 2rem;
+      padding-top: calc(60px + 2rem); /* Proper tablet padding to clear TopBar */
+    }
+
+    .header-section {
+      padding: 1rem 0; /* Better tablet spacing */
+      margin-bottom: 1.5rem;
+    }
+
+    .led-welcome-container {
+      padding: 0 2rem; /* More generous tablet padding */
+      max-width: 900px; /* Larger limit width for better proportions */
     }
 
     .led-border {
-      width: 400px;
-      height: 90px;
-      border-radius: 24px;
+      width: min(550px, 85vw); /* Wider and responsive on tablets */
+      height: 110px; /* Taller for better proportions */
+      border-radius: 28px;
+      padding: 14px;
+    }
+
+    .welcome-logo {
+      width: 58px; /* Larger tablet logo */
+      height: 58px;
+    }
+
+    .welcome-content {
+      gap: 1.25rem; /* More generous gap on tablet */
+      padding: 0 1rem;
+    }
+
+    .led-border::before {
+      top: 6px;
+      left: 6px;
+      right: 6px;
+      bottom: 6px;
+      border-radius: 22px;
     }
 
     .welcome-text {
-      font-size: 1.8rem;
+      font-size: clamp(1.5rem, 3.5vw, 2rem); /* Larger tablet scaling */
     }
 
     .led-screen-container {
@@ -988,6 +1067,40 @@
   }
 
   @media (min-width: 1024px) {
+    .led-welcome-container {
+      max-width: 1000px; /* Even larger for desktop */
+    }
+
+    .led-border {
+      width: min(600px, 80vw); /* Maximum width for desktop */
+      height: 120px; /* Tallest for desktop */
+      border-radius: 30px;
+      padding: 16px;
+    }
+
+    .welcome-logo {
+      width: 65px; /* Largest logo for desktop */
+      height: 65px;
+      border-radius: 12px;
+    }
+
+    .welcome-content {
+      gap: 1.5rem; /* Maximum gap for desktop */
+      padding: 0 1.25rem;
+    }
+
+    .led-border::before {
+      top: 7px;
+      left: 7px;
+      right: 7px;
+      bottom: 7px;
+      border-radius: 23px;
+    }
+
+    .welcome-text {
+      font-size: clamp(1.7rem, 3vw, 2.2rem); /* Largest text for desktop */
+    }
+
     .led-screen-container {
       max-width: 400px;
     }

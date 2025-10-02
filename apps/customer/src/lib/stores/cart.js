@@ -5,12 +5,16 @@ export const cartStore = writable([]);
 
 // Cart count derived store
 export const cartCount = derived(cartStore, items => 
-  items.reduce((total, item) => total + item.quantity, 0)
+  items.reduce((total, item) => total + (item.quantity || 0), 0)
 );
 
-// Cart total derived store  
+// Cart total derived store with price validation
 export const cartTotal = derived(cartStore, items => 
-  items.reduce((sum, item) => sum + (item.basePrice * item.quantity), 0)
+  items.reduce((sum, item) => {
+    const price = item.basePrice || item.price || 0;
+    const quantity = item.quantity || 0;
+    return sum + (price * quantity);
+  }, 0)
 );
 
 // Functions to manage cart

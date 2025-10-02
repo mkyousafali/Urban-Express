@@ -13,11 +13,19 @@ export const deliveryFeeTiers = writable([
 
 // Function to calculate delivery fee based on order total
 export function calculateDeliveryFee(orderTotal, tiers) {
+  // Ensure orderTotal is a valid number
+  const validTotal = orderTotal || 0;
+  
+  // Ensure tiers is an array
+  if (!Array.isArray(tiers) || tiers.length === 0) {
+    return 15; // Default delivery fee
+  }
+  
   const applicableTier = tiers.find(tier => 
-    orderTotal >= tier.minAmount && orderTotal <= tier.maxAmount
+    validTotal >= (tier.minAmount || 0) && validTotal <= (tier.maxAmount || Infinity)
   );
   
-  return applicableTier ? applicableTier.fee : 15; // Default to 15 SAR if no tier found
+  return applicableTier ? (applicableTier.fee || 0) : 15; // Default to 15 SAR if no tier found
 }
 
 // Admin functions to manage delivery fee tiers
@@ -66,21 +74,30 @@ export const deliveryFeeActions = {
 
 // Helper function to get delivery fee description for UI
 export function getDeliveryFeeDescription(orderTotal, tiers, language = 'en') {
-  const fee = calculateDeliveryFee(orderTotal, tiers);
-  const tier = tiers.find(t => orderTotal >= t.minAmount && orderTotal <= t.maxAmount);
+  // Ensure orderTotal is a valid number
+  const validTotal = orderTotal || 0;
+  
+  // Ensure tiers is an array
+  if (!Array.isArray(tiers) || tiers.length === 0) {
+    const currency = language === 'ar' ? 'ريال' : 'SAR';
+    return `15.00 ${currency}`; // Default delivery fee
+  }
+  
+  const fee = calculateDeliveryFee(validTotal, tiers);
+  const tier = tiers.find(t => validTotal >= (t.minAmount || 0) && validTotal <= (t.maxAmount || Infinity));
   
   if (fee === 0) {
     return language === 'ar' ? 'توصيل مجاني' : 'Free Delivery';
   }
   
   const currency = language === 'ar' ? 'ريال' : 'SAR';
-  const feeText = `${fee.toFixed(2)} ${currency}`;
+  const feeText = `${(fee || 0).toFixed(2)} ${currency}`;
   
   if (tier && tier.maxAmount !== Infinity) {
-    const nextTier = tiers.find(t => t.minAmount > tier.maxAmount);
-    if (nextTier && nextTier.fee < fee) {
-      const needed = nextTier.minAmount - orderTotal;
-      const savings = fee - nextTier.fee;
+    const nextTier = tiers.find(t => (t.minAmount || 0) > (tier.maxAmount || 0));
+    if (nextTier && (nextTier.fee || 0) < fee) {
+      const needed = (nextTier.minAmount || 0) - validTotal;
+      const savings = fee - (nextTier.fee || 0);
       if (language === 'ar') {
         return `${feeText} - أضف ${needed.toFixed(2)} ريال لتوفير ${savings.toFixed(2)} ريال`;
       } else {
