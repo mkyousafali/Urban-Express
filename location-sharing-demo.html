@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Express - Location Sharing Flow Demo</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4a5568;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .flow-step {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border-left: 4px solid #4299e1;
+        }
+        .step-number {
+            background: #4299e1;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .step-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        .step-description {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        .highlight {
+            background: #fef5e7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #c05621;
+            font-weight: 500;
+        }
+        .success {
+            background: #f0fff4;
+            border-left-color: #48bb78;
+        }
+        .admin {
+            background: #fef5e7;
+            border-left-color: #ed8936;
+        }
+        .test-links {
+            margin: 30px 0;
+            padding: 20px;
+            background: #e6fffa;
+            border-radius: 8px;
+            border: 1px solid #81e6d9;
+        }
+        .test-links h3 {
+            color: #2c7a7b;
+            margin-bottom: 15px;
+        }
+        .test-links a {
+            display: inline-block;
+            margin: 5px 10px 5px 0;
+            padding: 10px 20px;
+            background: #319795;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .test-links a:hover {
+            background: #2c7a7b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Urban Express - New Location Sharing Flow</h1>
+        
+        <div class="test-links">
+            <h3>🧪 Test the Complete Flow:</h3>
+            <a href="http://localhost:3001/auth/signup" target="_blank">Try Signup Form</a>
+            <a href="http://localhost:3001/auth/signup/location-sharing" target="_blank">View Location Page</a>
+            <a href="http://localhost:3001/profile" target="_blank">Profile Page (Location Change)</a>
+            <a href="http://localhost:3001/admin/location-management" target="_blank">Admin Location Management</a>
+        </div>
+
+        <div class="flow-step">
+            <div class="step-title">
+                <span class="step-number">1</span>
+                Customer Signs Up (UPDATED)
+            </div>
+            <div class="step-description">
+                • <span class="highlight">Removed "Default Location" field</span> from signup form<br>
+                • Customer only enters: Full Name, WhatsApp, Password, Confirm Password<br>
+                • After submitting, they're redirected to location sharing page
+            </div>
+        </div>
+
+        <div class="flow-step success">
+            <div class="step-title">
+                <span class="step-number">2</span>
+                Location Sharing Page (MANDATORY)
+            </div>
+            <div class="step-description">
+                • Shows success message: "Signup request submitted"<br>
+                • <span class="highlight">⚠️ Location sharing is now mandatory</span><br>
+                • <span class="highlight">No skip option</span> - request won't be accepted without location<br>
+                • Button opens WhatsApp with admin's number<br>
+                • Clear warning: "Your request will NOT be accepted until you share your location"<br>
+                • Pre-filled message and step-by-step instructions
+            </div>
+        </div>
+
+        <div class="flow-step">
+            <div class="step-title">
+                <span class="step-number">3</span>
+                Customer Shares Location via WhatsApp
+            </div>
+            <div class="step-description">
+                • Customer clicks attachment icon (📎) in WhatsApp<br>
+                • Selects "Location" → "Current Location" or "Live Location"<br>
+                • <span class="highlight">No map API needed</span> - uses WhatsApp's built-in location sharing<br>
+                • Admin receives location link directly in WhatsApp
+            </div>
+        </div>
+
+        <div class="flow-step admin">
+            <div class="step-title">
+                <span class="step-number">4</span>
+                Admin Management (NEW)
+            </div>
+            <div class="step-description">
+                • <span class="highlight">Admin sets WhatsApp number</span> in settings to receive locations<br>
+                • When location is received, admin copies the location link<br>
+                • <span class="highlight">Admin pastes link</span> in "Received Location Link" field<br>
+                • Saves settings to link customer with their location
+            </div>
+        </div>
+
+        <div class="flow-step">
+            <div class="step-title">
+                <span class="step-number">5</span>
+                Location Change from Profile (NEW)
+            </div>
+            <div class="step-description">
+                • <span class="highlight">Customer can change location later</span> from profile page<br>
+                • Profile shows current location with "Change Location" button<br>
+                • <span class="highlight">WhatsApp redirect button</span> sends location change request<br>
+                • 24-hour review process for location updates<br>
+                • Admin can assign/change WhatsApp number for receiving requests
+            </div>
+        </div>
+
+        <div class="flow-step admin">
+            <div class="step-title">
+                <span class="step-number">6</span>
+                Admin Location Management (NEW)
+            </div>
+            <div class="step-description">
+                • <span class="highlight">Admin dashboard</span> for managing location change requests<br>
+                • Admin can set/change WhatsApp number for receiving location requests<br>
+                • <span class="highlight">View all location change requests</span> from customers<br>
+                • Copy/paste new location links from WhatsApp<br>
+                • Approve/reject location change requests with one click
+            </div>
+        </div>
+
+        <div class="flow-step success">
+            <div class="step-title">
+                <span class="step-number">7</span>
+                Account Activation & Updates
+            </div>
+            <div class="step-description">
+                • <span class="highlight">Initial account activated within 24 hours</span> after location sharing<br>
+                • Location change requests processed within 24 hours<br>
+                • Customer receives confirmation of location updates<br>
+                • Seamless delivery experience with accurate locations<br>
+                • Admin maintains complete control over location verification
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background: #fef2f2; border-radius: 8px; border: 2px solid #f87171;">
+            <h3 style="color: #dc2626; margin-bottom: 15px;">⚠️ Important: Location Sharing is Mandatory</h3>
+            <ul style="color: #7f1d1d; line-height: 1.8;">
+                <li><strong>No skip option</strong> - Customer cannot bypass location sharing</li>
+                <li><strong>Account activation blocked</strong> - Request won't be processed without location</li>
+                <li><strong>Clear messaging</strong> - Customer knows this step is required</li>
+                <li><strong>Better delivery accuracy</strong> - Ensures we have precise delivery locations</li>
+                <li><strong>Admin workflow</strong> - No incomplete signups to manage</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 20px; padding: 20px; background: #e6fffa; border-radius: 8px; border: 2px solid #48bb78;">
+            <h3 style="color: #2c7a7b; margin-bottom: 15px;">✅ Complete Location Management System:</h3>
+            <ul style="color: #2d3748; line-height: 1.8;">
+                <li><strong>Initial signup</strong> - Mandatory location sharing via WhatsApp</li>
+                <li><strong>24-hour activation</strong> - Account activated after location verification</li>
+                <li><strong>Profile location change</strong> - Customers can update location anytime</li>
+                <li><strong>Admin management</strong> - Full dashboard for location change requests</li>
+                <li><strong>WhatsApp integration</strong> - Admin configurable phone number</li>
+                <li><strong>No API costs</strong> - Uses WhatsApp's free location sharing</li>
+                <li><strong>Accurate deliveries</strong> - Customer-verified delivery locations</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

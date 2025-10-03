@@ -7,8 +7,12 @@
 
   // Pages that should show navigation
   $: showNavigation = !$page.url.pathname.startsWith('/auth/');
-  // Hide cart bar on checkout page
-  $: showCartBar = showNavigation && !$page.url.pathname.startsWith('/checkout');
+  // Hide cart bar on checkout, finalize, pickup, and orders pages
+  $: showCartBar = showNavigation && 
+    !$page.url.pathname.startsWith('/checkout') && 
+    !$page.url.pathname.startsWith('/finalize') && 
+    !$page.url.pathname.startsWith('/pickup') &&
+    !$page.url.pathname.startsWith('/orders');
 </script>
 
 {#if showNavigation}

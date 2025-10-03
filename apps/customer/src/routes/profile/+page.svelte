@@ -5,6 +5,8 @@
   import Card from '$lib/components/Card.svelte';
   
   let currentLanguage = 'ar';
+  let adminWhatsAppNumber = '+966501234567'; // This will be loaded from admin settings
+  let currentLocation = 'الرياض، حي العليا، شارع الملك فهد'; // This would come from user data
 
   // Load language from localStorage
   onMount(() => {
@@ -83,6 +85,9 @@
     memberSince: 'عضو منذ',
     totalOrders: 'إجمالي الطلبات',
     addresses: 'العناوين',
+    currentLocation: 'الموقع الحالي',
+    changeLocation: 'تغيير الموقع',
+    locationChangeRequest: 'طلب تغيير الموقع',
     security: 'الأمان',
     legal: 'القوانين',
     support: 'الدعم',
@@ -112,6 +117,9 @@
     memberSince: 'Member Since',
     totalOrders: 'Total Orders',
     addresses: 'Addresses',
+    currentLocation: 'Current Location',
+    changeLocation: 'Change Location',
+    locationChangeRequest: 'Location Change Request',
     security: 'Security',
     legal: 'Legal',
     support: 'Support',
@@ -143,6 +151,18 @@
   function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString(currentLanguage === 'ar' ? 'ar-SA' : 'en-US');
+  }
+
+  function requestLocationChange() {
+    const message = currentLanguage === 'ar' 
+      ? 'مرحباً، أريد تغيير موقعي الافتراضي في حساب Urban Express. الموقع الحالي: ' + currentLocation
+      : 'Hello, I want to change my default location in Urban Express account. Current location: ' + currentLocation;
+    
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${adminWhatsAppNumber.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
+    
+    // Open WhatsApp in new window
+    window.open(whatsappUrl, '_blank');
   }
 </script>
 
@@ -176,6 +196,39 @@
             <label>{texts.totalOrders}:</label>
             <span>{userProfile.totalOrders}</span>
           </div>
+        </div>
+      </div>
+    </div>
+  </Card>
+
+  <!-- Location Management -->
+  <Card>
+    <div class="section">
+      <h2>{texts.addresses}</h2>
+      <div class="location-section">
+        <div class="current-location">
+          <div class="location-info">
+            <div class="location-icon">📍</div>
+            <div class="location-details">
+              <label>{texts.currentLocation}:</label>
+              <span class="location-text">{currentLocation}</span>
+            </div>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            on:click={requestLocationChange}
+          >
+            <span class="whatsapp-icon">📱</span>
+            {texts.changeLocation}
+          </Button>
+        </div>
+        
+        <div class="location-note">
+          <p>{currentLanguage === 'ar' 
+            ? 'سيتم إرسال طلب تغيير الموقع عبر الواتساب. سيقوم الفريق بمراجعة طلبك خلال 24 ساعة.'
+            : 'Location change request will be sent via WhatsApp. Our team will review your request within 24 hours.'
+          }</p>
         </div>
       </div>
     </div>
@@ -370,6 +423,69 @@
 
   .info-item span {
     color: var(--color-ink);
+  }
+
+  /* Location Section Styles */
+  .location-section {
+    margin-top: var(--space-4);
+  }
+
+  .current-location {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-4);
+    background: var(--color-surface-variant);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-3);
+  }
+
+  .location-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex: 1;
+  }
+
+  .location-icon {
+    font-size: 1.5rem;
+    color: var(--color-primary);
+  }
+
+  .location-details {
+    flex: 1;
+  }
+
+  .location-details label {
+    display: block;
+    color: var(--color-ink-light);
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: var(--space-1);
+  }
+
+  .location-text {
+    color: var(--color-ink);
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .location-note {
+    padding: var(--space-3);
+    background: #f0f9ff;
+    border: 1px solid #7dd3fc;
+    border-radius: var(--radius-md);
+  }
+
+  .location-note p {
+    margin: 0;
+    color: #0c4a6e;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .whatsapp-icon {
+    margin-right: var(--space-1);
   }
 
   .menu-items {

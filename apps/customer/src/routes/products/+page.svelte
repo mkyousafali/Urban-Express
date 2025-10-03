@@ -4,6 +4,7 @@
   import Button from '$lib/components/Button.svelte';
   import Card from '$lib/components/Card.svelte';
   import { cartActions, cartStore } from '$lib/stores/cart.js';
+  import { scrollingContent, scrollingContentActions } from '$lib/stores/scrollingContent.js';
   
   let currentLanguage = 'ar';
   let searchQuery = '';
@@ -15,6 +16,10 @@
     // Reactive cart items for quantity display - force reactivity
   $: cartItems = $cartStore;
   $: cartItemsMap = new Map(cartItems.map(item => [String(item.id), item.quantity]));
+
+  // Subscribe to scrolling content store
+  $: currentScrollingContent = $scrollingContent;
+  $: activeScrollingTexts = scrollingContentActions.getActiveContent(currentScrollingContent, currentLanguage);
 
   // Touch gesture variables
   let touchStartX = 0;
@@ -827,6 +832,23 @@
     </div>
   </div>
 
+  <!-- VAT Notice Scrolling Bar -->
+  {#if activeScrollingTexts.length > 0}
+    <div class="vat-notice-container">
+      <div class="vat-notice-scrolling">
+        {#each activeScrollingTexts as text}
+          <span class="vat-notice-text">{text}</span>
+        {/each}
+        {#each activeScrollingTexts as text}
+          <span class="vat-notice-text">{text}</span>
+        {/each}
+        {#each activeScrollingTexts as text}
+          <span class="vat-notice-text">{text}</span>
+        {/each}
+      </div>
+    </div>
+  {/if}
+
   <!-- Category Filter -->
   <div class="category-filter">
     <h3>{texts.selectCategory}</h3>
@@ -981,6 +1003,57 @@
 
   .search-section {
     margin-bottom: 1.5rem;
+  }
+
+  /* VAT Notice Scrolling Bar */
+  .vat-notice-container {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    padding: 0.5rem 0;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    border-radius: 8px;
+    position: relative;
+  }
+
+  .vat-notice-scrolling {
+    display: flex;
+    white-space: nowrap;
+    animation: scrollLeft 15s linear infinite;
+  }
+
+  .vat-notice-text {
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-right: 4rem;
+    flex-shrink: 0;
+  }
+
+  [dir="rtl"] .vat-notice-text {
+    margin-right: 0;
+    margin-left: 4rem;
+  }
+
+  [dir="rtl"] .vat-notice-scrolling {
+    animation: scrollRight 15s linear infinite;
+  }
+
+  @keyframes scrollLeft {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes scrollRight {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
   }
 
   .search-bar {

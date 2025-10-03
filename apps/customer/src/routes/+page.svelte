@@ -405,8 +405,8 @@
   }
 
   .welcome-logo {
-    width: 50px; /* Larger logo for wider container */
-    height: 50px;
+    width: 100px; /* Larger logo for wider container */
+    height: 100px;
     object-fit: contain;
     border-radius: 10px; /* Larger border radius */
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
@@ -993,8 +993,8 @@
     }
 
     .welcome-logo {
-      width: 58px; /* Larger tablet logo */
-      height: 58px;
+      width: 120px; /* Larger tablet logo */
+      height: 120px;
     }
 
     .welcome-content {
@@ -1079,8 +1079,8 @@
     }
 
     .welcome-logo {
-      width: 65px; /* Largest logo for desktop */
-      height: 65px;
+      width: 140px; /* Largest logo for desktop */
+      height: 140px;
       border-radius: 12px;
     }
 

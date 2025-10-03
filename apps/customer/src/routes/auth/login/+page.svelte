@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte';
   import Button from '$lib/components/Button.svelte';
   import Input from '$lib/components/Input.svelte';
   import Card from '$lib/components/Card.svelte';
@@ -17,6 +18,30 @@
     whatsapp: '0501234567',
     password: 'demo123'
   };
+
+  // Load language from localStorage and listen for changes
+  onMount(() => {
+    const savedLanguage = localStorage.getItem('language');
+    if (savedLanguage) {
+      currentLanguage = savedLanguage;
+      document.documentElement.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+      document.documentElement.lang = currentLanguage;
+    }
+
+    // Listen for language changes from other tabs/pages
+    function handleStorageChange(event) {
+      if (event.key === 'language') {
+        currentLanguage = event.newValue || 'ar';
+        document.documentElement.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = currentLanguage;
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  });
 
   function formatWhatsAppNumber(value) {
     // Remove any non-digit characters
@@ -97,9 +122,17 @@
 
   function toggleLanguage() {
     currentLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
+    // Save to localStorage
+    localStorage.setItem('language', currentLanguage);
     // Update document direction
     document.documentElement.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = currentLanguage;
+    
+    // Dispatch storage event for other components/pages
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'language',
+      newValue: currentLanguage
+    }));
   }
 
   // Language text

@@ -67,7 +67,7 @@
   $: texts = currentLanguage === 'ar' ? {
     items: 'عنصر',
     total: 'المجموع',
-    checkout: 'الدفع',
+    checkout: 'إنهاء طلبك',
     sar: 'ر.س',
     freeDelivery: 'توصيل مجاني!',
     freeDeliveryUnlocked: 'تم فتح التوصيل المجاني! 🎉',
@@ -76,7 +76,7 @@
   } : {
     items: 'items',
     total: 'Total',
-    checkout: 'Checkout',
+    checkout: 'Finalize your order',
     sar: 'SAR',
     freeDelivery: 'Free Delivery!',
     freeDeliveryUnlocked: 'Free Delivery Unlocked! 🎉',
@@ -99,7 +99,7 @@
   }
 
   function goToCheckout() {
-    goto('/checkout');
+    goto('/finalize');
   }
 
   function goToCart() {

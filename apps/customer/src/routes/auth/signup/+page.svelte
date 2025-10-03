@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte';
   import Button from '$lib/components/Button.svelte';
   import Input from '$lib/components/Input.svelte';
   import Card from '$lib/components/Card.svelte';
@@ -8,11 +9,36 @@
   let whatsappNumber = '';
   let password = '';
   let confirmPassword = '';
-  let defaultLocation = '';
   let acceptTerms = false;
   let loading = false;
   let error = '';
   let currentLanguage = 'ar';
+
+  // Load language from localStorage and listen for changes
+  onMount(() => {
+    const savedLanguage = localStorage.getItem('language');
+    if (savedLanguage) {
+      currentLanguage = savedLanguage;
+      // Update document direction immediately
+      document.documentElement.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+      document.documentElement.lang = currentLanguage;
+    }
+
+    // Listen for language changes from other tabs/pages
+    function handleStorageChange(event) {
+      if (event.key === 'language') {
+        currentLanguage = event.newValue || 'ar';
+        // Update document direction when language changes
+        document.documentElement.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = currentLanguage;
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  });
 
   // Language text
   $: texts = currentLanguage === 'ar' ? {
@@ -22,8 +48,6 @@
     whatsappLabel: 'رقم الواتساب',
     passwordLabel: 'كلمة المرور',
     confirmPasswordLabel: 'تأكيد كلمة المرور',
-    locationLabel: 'الموقع الافتراضي',
-    locationPlaceholder: 'اختر موقعك على الخريطة',
     termsLabel: 'أوافق على الشروط والأحكام',
     submitButton: 'إرسال الطلب',
     submitting: 'جاري الإرسال...',
@@ -36,8 +60,6 @@
     whatsappLabel: 'WhatsApp Number',
     passwordLabel: 'Password',
     confirmPasswordLabel: 'Confirm Password',
-    locationLabel: 'Default Location',
-    locationPlaceholder: 'Choose your location on map',
     termsLabel: 'I agree to Terms & Conditions',
     submitButton: 'Submit Request',
     submitting: 'Submitting...',
@@ -47,7 +69,7 @@
 
   async function handleSubmit() {
     if (!acceptTerms) {
-      error = 'يرجى الموافقة على الشروط والأحكام';
+      error = currentLanguage === 'ar' ? 'يرجى الموافقة على الشروط والأحكام' : 'Please agree to Terms & Conditions';
       return;
     }
     
@@ -55,12 +77,8 @@
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Redirect to success page
-    goto('/auth/signup/success');
-  }
-
-  function toggleLanguage() {
-    currentLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
+    // After successful signup, redirect to location sharing page
+    goto('/auth/signup/location-sharing');
   }
 </script>
 
@@ -75,7 +93,6 @@
         <Input label={texts.whatsappLabel} bind:value={whatsappNumber} type="tel" required />
         <Input label={texts.passwordLabel} bind:value={password} type="password" required />
         <Input label={texts.confirmPasswordLabel} bind:value={confirmPassword} type="password" required />
-        <Input label={texts.locationLabel} bind:value={defaultLocation} placeholder={texts.locationPlaceholder} required />
         
         <label class="checkbox-label">
           <input type="checkbox" bind:checked={acceptTerms} />
@@ -106,7 +123,7 @@
     align-items: center;
     justify-content: center;
     padding: var(--space-4);
-    background: var(--gradient-brand);
+    background: var(--gradient-primary);
   }
 
   .signup-content {
@@ -142,5 +159,16 @@
     font-size: 0.875rem;
     color: var(--color-ink-light);
     margin-top: var(--space-2);
+  }
+
+  /* Mobile Responsiveness */
+  @media (max-width: 480px) {
+    .signup-container {
+      padding: var(--space-2);
+    }
+
+    .signup-content {
+      padding: var(--space-4);
+    }
   }
 </style>
